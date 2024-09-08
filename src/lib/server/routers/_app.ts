@@ -16,6 +16,7 @@ import { facultyRouter } from "./faculty";
 import { facultySubjectRouter } from "./facultySubject";
 import { scheduleRouter } from "./schedule";
 import { scheduleHistoryRouter } from "./scheduleHistory";
+import { attendanceRecordRouter } from "./attendanceRecord";
 
 export const appRouter = router({
   computers: computersRouter,
@@ -35,6 +36,7 @@ export const appRouter = router({
   facultySubject: facultySubjectRouter,
   schedule: scheduleRouter,
   scheduleHistory: scheduleHistoryRouter,
+  attendanceRecord: attendanceRecordRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -227,19 +227,21 @@ model Enrollment {
   userId                  String
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
+  attendanceRecord        AttendanceRecord[]
 
   @@index([userId])
 }
 
 model Faculty {
-  id             String           @id @default(cuid())
-  name           String
-  department     Department       @relation(fields: [departmentId], references: [id])
-  departmentId   String
-  userId         String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  FacultySubject FacultySubject[]
+  id               String             @id @default(cuid())
+  name             String
+  department       Department         @relation(fields: [departmentId], references: [id])
+  departmentId     String
+  userId           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  FacultySubject   FacultySubject[]
+  AttendanceRecord AttendanceRecord[]
 
   @@index([userId])
 }
@@ -260,40 +262,61 @@ model FacultySubject {
 }
 
 model Schedule {
-  id               String            @id @default(cuid())
-  day              Day               @relation(fields: [dayId], references: [id])
+  id               String             @id @default(cuid())
+  day              Day                @relation(fields: [dayId], references: [id])
   dayId            String
-  period           Period            @relation(fields: [periodId], references: [id])
+  period           Period             @relation(fields: [periodId], references: [id])
   periodId         String
-  facultySubject   FacultySubject    @relation(fields: [facultySubjectId], references: [id])
+  facultySubject   FacultySubject     @relation(fields: [facultySubjectId], references: [id])
   facultySubjectId String
-  section          Section           @relation(fields: [sectionId], references: [id])
+  section          Section            @relation(fields: [sectionId], references: [id])
   sectionId        String
   version          Int
   isActive         Boolean
   isDeleted        Boolean
   isArchived       Boolean
   userId           String
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   scheduleHistory  ScheduleHistory[]
+  AttendanceRecord AttendanceRecord[]
 
   @@index([userId])
 }
 
 model ScheduleHistory {
-  id               String         @id @default(cuid())
-  schedule         Schedule       @relation(fields: [scheduleId], references: [id])
+  id               String             @id @default(cuid())
+  schedule         Schedule           @relation(fields: [scheduleId], references: [id])
   scheduleId       String
-  day              Day            @relation(fields: [dayId], references: [id])
+  day              Day                @relation(fields: [dayId], references: [id])
   dayId            String
-  period           Period         @relation(fields: [periodId], references: [id])
+  period           Period             @relation(fields: [periodId], references: [id])
   periodId         String
-  facultySubject   FacultySubject @relation(fields: [facultySubjectId], references: [id])
+  facultySubject   FacultySubject     @relation(fields: [facultySubjectId], references: [id])
   facultySubjectId String
   userId           String
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  AttendanceRecord AttendanceRecord[]
+
+  @@index([userId])
+}
+
+model AttendanceRecord {
+  id                String          @id @default(cuid())
+  date              DateTime
+  enrollment        Enrollment      @relation(fields: [enrollmentId], references: [id])
+  enrollmentId      String
+  schedule          Schedule        @relation(fields: [scheduleId], references: [id])
+  scheduleId        String
+  isPresent         Boolean
+  faculty           Faculty         @relation(fields: [facultyId], references: [id])
+  facultyId         String
+  scheduleHistory   ScheduleHistory @relation(fields: [scheduleHistoryId], references: [id])
+  scheduleHistoryId String
+  userId            String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@index([userId])
 }

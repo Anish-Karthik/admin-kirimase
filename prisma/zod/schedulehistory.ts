@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { CompleteSchedule, relatedScheduleSchema, CompleteDay, relatedDaySchema, CompletePeriod, relatedPeriodSchema, CompleteFacultySubject, relatedFacultySubjectSchema } from "./index"
+import { CompleteSchedule, relatedScheduleSchema, CompleteDay, relatedDaySchema, CompletePeriod, relatedPeriodSchema, CompleteFacultySubject, relatedFacultySubjectSchema, CompleteAttendanceRecord, relatedAttendanceRecordSchema } from "./index"
 
 export const scheduleHistorySchema = z.object({
   id: z.string(),
@@ -17,6 +17,7 @@ export interface CompleteScheduleHistory extends z.infer<typeof scheduleHistoryS
   day: CompleteDay
   period: CompletePeriod
   facultySubject: CompleteFacultySubject
+  AttendanceRecord: CompleteAttendanceRecord[]
 }
 
 /**
@@ -29,4 +30,5 @@ export const relatedScheduleHistorySchema: z.ZodSchema<CompleteScheduleHistory> 
   day: relatedDaySchema,
   period: relatedPeriodSchema,
   facultySubject: relatedFacultySubjectSchema,
+  AttendanceRecord: relatedAttendanceRecordSchema.array(),
 }))
