@@ -137,6 +137,7 @@ model CourseEnrolledStudent {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   electiveSubject ElectiveSubject[]
+  enrollment      Enrollment[]
 
   @@index([userId])
 }
@@ -175,6 +176,7 @@ model Section {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   ElectiveSubject ElectiveSubject[]
+  Enrollment      Enrollment[]
 
   @@index([userId])
 }
@@ -203,5 +205,21 @@ model ElectiveSubject {
   updatedAt               DateTime              @updatedAt
 
   @@index([courseEnrolledStudentId])
+  @@index([userId])
+}
+
+model Enrollment {
+  id                      String                @id @default(cuid())
+  rollNumber              Int
+  courseEnrolledStudent   CourseEnrolledStudent @relation(fields: [courseEnrolledStudentId], references: [id])
+  courseEnrolledStudentId String
+  section                 Section               @relation(fields: [sectionId], references: [id])
+  sectionId               String
+  joinedAt                DateTime
+  leftAt                  DateTime?
+  userId                  String
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
   @@index([userId])
 }

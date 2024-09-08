@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { CompleteCourse, relatedCourseSchema, CompleteStudent, relatedStudentSchema, CompleteElectiveSubject, relatedElectiveSubjectSchema } from "./index"
+import { CompleteCourse, relatedCourseSchema, CompleteStudent, relatedStudentSchema, CompleteElectiveSubject, relatedElectiveSubjectSchema, CompleteEnrollment, relatedEnrollmentSchema } from "./index"
 
 export const courseEnrolledStudentSchema = z.object({
   id: z.string(),
@@ -15,6 +15,7 @@ export interface CompleteCourseEnrolledStudent extends z.infer<typeof courseEnro
   course: CompleteCourse
   student: CompleteStudent
   electiveSubject: CompleteElectiveSubject[]
+  enrollment: CompleteEnrollment[]
 }
 
 /**
@@ -26,4 +27,5 @@ export const relatedCourseEnrolledStudentSchema: z.ZodSchema<CompleteCourseEnrol
   course: relatedCourseSchema,
   student: relatedStudentSchema,
   electiveSubject: relatedElectiveSubjectSchema.array(),
+  enrollment: relatedEnrollmentSchema.array(),
 }))
