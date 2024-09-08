@@ -107,6 +107,7 @@ model Course {
   updatedAt             DateTime                @updatedAt
   courseEnrolledStudent CourseEnrolledStudent[]
   period                Period[]
+  section               Section[]
 
   @@index([userId])
 }
@@ -153,6 +154,20 @@ model Period {
   endTime   DateTime
   version   Int
   isActive  Boolean
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Section {
+  id        String   @id @default(cuid())
+  name      String
+  batchYear Int
+  semester  Int
   course    Course   @relation(fields: [courseId], references: [id])
   courseId  String
   userId    String
