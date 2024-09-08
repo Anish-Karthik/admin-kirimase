@@ -5,7 +5,7 @@ import { checkAuth } from "@/lib/auth/utils";
 
 export default async function College() {
   await checkAuth();
-  const { college } = await api.college.getCollege.query();  
+  const { colleges } = await api.college.getColleges.query();
 
   return (
     <main>
@@ -13,7 +13,7 @@ export default async function College() {
         <h1 className="font-semibold text-2xl my-2">College</h1>
         <NewCollegeModal />
       </div>
-      <CollegeList college={college} />
+      <CollegeList colleges={colleges} />
     </main>
   );
 }

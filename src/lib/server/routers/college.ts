@@ -1,4 +1,4 @@
-import { getCollegeById, getCollege } from "@/lib/api/college/queries";
+import { getCollegeById, getColleges } from "@/lib/api/college/queries";
 import { publicProcedure, router } from "@/lib/server/trpc";
 import {
   collegeIdSchema,
@@ -8,8 +8,8 @@ import {
 import { createCollege, deleteCollege, updateCollege } from "@/lib/api/college/mutations";
 
 export const collegeRouter = router({
-  getCollege: publicProcedure.query(async () => {
-    return getCollege();
+  getColleges: publicProcedure.query(async () => {
+    return getColleges();
   }),
   getCollegeById: publicProcedure.input(collegeIdSchema).query(async ({ input }) => {
     return getCollegeById(input.id);

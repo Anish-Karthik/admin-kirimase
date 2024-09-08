@@ -1,4 +1,4 @@
-import { getUserById, getUser } from "@/lib/api/user/queries";
+import { getUserById, getUsers } from "@/lib/api/user/queries";
 import { publicProcedure, router } from "@/lib/server/trpc";
 import {
   userIdSchema,
@@ -8,8 +8,8 @@ import {
 import { createUser, deleteUser, updateUser } from "@/lib/api/user/mutations";
 
 export const userRouter = router({
-  getUser: publicProcedure.query(async () => {
-    return getUser();
+  getUsers: publicProcedure.query(async () => {
+    return getUsers();
   }),
   getUserById: publicProcedure.input(userIdSchema).query(async ({ input }) => {
     return getUserById(input.id);

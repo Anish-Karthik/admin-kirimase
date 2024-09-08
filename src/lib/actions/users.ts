@@ -1,60 +1,60 @@
-'use server'
+"use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db/index";
 
-import { Argon2id } from 'oslo/password'
-import { generateId } from 'lucia'
-import { lucia, validateRequest } from '../auth/lucia'
+import { Argon2id } from "oslo/password";
+import { generateId } from "lucia";
+import { lucia, validateRequest } from "../auth/lucia";
 import {
   genericError,
   setAuthCookie,
   validateAuthFormData,
   getUserAuth,
-} from '../auth/utils'
+} from "../auth/utils";
 
 import { updateUserSchema } from "../db/schema/auth";
 
 interface ActionResult {
-  error: string
+  error: string;
 }
 
 export async function signInAction(
   _: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const { data, error } = validateAuthFormData(formData)
-  if (error !== null) return { error }
+  const { data, error } = validateAuthFormData(formData);
+  if (error !== null) return { error };
 
   try {
     const existingUser = await db.user.findUnique({
       where: { email: data.email.toLowerCase() },
-    })
+    });
     if (!existingUser) {
       return {
-        error: 'Incorrect username or password',
-      }
+        error: "Incorrect username or password",
+      };
     }
 
     const validPassword = await new Argon2id().verify(
-      existingUser.hashedPassword,
+      existingUser.password,
       data.password
-    )
+    );
     if (!validPassword) {
       return {
-        error: 'Incorrect username or password',
-      }
+        error: "Incorrect username or password",
+      };
     }
 
-    const session = await lucia.createSession(existingUser.id, {})
-    const sessionCookie = lucia.createSessionCookie(session.id)
+    const session = await lucia.createSession(existingUser.id, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
     setAuthCookie(sessionCookie);
 
-    return redirect('/dashboard')
+    return redirect("/dashboard");
   } catch (e) {
-    return genericError
+    return genericError;
   }
 }
 
@@ -62,49 +62,52 @@ export async function signUpAction(
   _: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const { data, error } = validateAuthFormData(formData)
+  const { data, error } = validateAuthFormData(formData);
 
-  if (error !== null) return { error }
+  if (error !== null) return { error };
 
-  const hashedPassword = await new Argon2id().hash(data.password)
-  const userId = generateId(15)
+  const hashedPassword = await new Argon2id().hash(data.password);
+  const userId = generateId(15);
 
   try {
     await db.user.create({
       data: {
         id: userId,
         email: data.email,
-        hashedPassword,
+        password: hashedPassword,
+        role: "USER",
+        verified: false,
+        userId: userId,
       },
-    })
+    });
   } catch (e) {
-    return genericError
+    return genericError;
   }
 
-  const session = await lucia.createSession(userId, {})
-  const sessionCookie = lucia.createSessionCookie(session.id)
-  setAuthCookie(sessionCookie)
-  return redirect('/dashboard')
+  const session = await lucia.createSession(userId, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  setAuthCookie(sessionCookie);
+  return redirect("/dashboard");
 }
 
 export async function signOutAction(): Promise<ActionResult> {
-  const { session } = await validateRequest()
+  const { session } = await validateRequest();
   if (!session) {
     return {
-      error: 'Unauthorized',
-    }
+      error: "Unauthorized",
+    };
   }
 
-  await lucia.invalidateSession(session.id)
+  await lucia.invalidateSession(session.id);
 
-  const sessionCookie = lucia.createBlankSessionCookie()
-  setAuthCookie(sessionCookie)
-  redirect('/sign-in')
+  const sessionCookie = lucia.createBlankSessionCookie();
+  setAuthCookie(sessionCookie);
+  redirect("/sign-in");
 }
 
 export async function updateUser(
-  _: any,
-  formData: FormData,
+  _: unknown,
+  formData: FormData
 ): Promise<ActionResult & { success?: boolean }> {
   const { session } = await getUserAuth();
   if (!session) return { error: "Unauthorised" };
@@ -132,4 +135,3 @@ export async function updateUser(
     return genericError;
   }
 }
-

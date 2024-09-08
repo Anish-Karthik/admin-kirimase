@@ -5,7 +5,7 @@ import UserModal from "./UserModal";
 
 
 export default function UserList({ user }: { user: CompleteUser[] }) {
-  const { data: u } = trpc.user.getUser.useQuery(undefined, {
+  const { data: u } = trpc.user.getUsers.useQuery(undefined, {
     initialData: { user },
     refetchOnMount: false,
   });

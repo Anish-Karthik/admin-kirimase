@@ -1,6 +1,10 @@
 "use client";
 
-import { College, NewCollegeParams, insertCollegeParams } from "@/lib/db/schema/college";
+import {
+  College,
+  NewCollegeParams,
+  insertCollegeParams,
+} from "@/lib/db/schema/college";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -18,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const CollegeForm = ({
   college,
@@ -26,7 +31,6 @@ const CollegeForm = ({
   college?: College;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!college?.id;
 
   const router = useRouter();
@@ -39,39 +43,40 @@ const CollegeForm = ({
     resolver: zodResolver(insertCollegeParams),
     defaultValues: college ?? {
       name: "",
-     address: ""
+      address: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
-    await utils.college.getCollege.invalidate();
+    await utils.college.getColleges.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`College ${action}d!`);
+    toast.success(`College ${action}d!`);
   };
 
   const { mutate: createCollege, isLoading: isCreating } =
     trpc.college.createCollege.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateCollege, isLoading: isUpdating } =
     trpc.college.updateCollege.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteCollege, isLoading: isDeleting } =
     trpc.college.deleteCollege.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -88,11 +93,12 @@ const CollegeForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -101,11 +107,13 @@ const CollegeForm = ({
         <FormField
           control={form.control}
           name="address"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Address</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                {/* @ts-expect-error: none */}
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>

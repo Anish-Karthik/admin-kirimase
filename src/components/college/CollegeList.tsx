@@ -3,20 +3,23 @@ import { CompleteCollege } from "@/lib/db/schema/college";
 import { trpc } from "@/lib/trpc/client";
 import CollegeModal from "./CollegeModal";
 
-
-export default function CollegeList({ college }: { college: CompleteCollege[] }) {
-  const { data: c } = trpc.college.getCollege.useQuery(undefined, {
-    initialData: { college },
+export default function CollegeList({
+  colleges,
+}: {
+  colleges: CompleteCollege[];
+}) {
+  const { data: c } = trpc.college.getColleges.useQuery(undefined, {
+    initialData: { colleges },
     refetchOnMount: false,
   });
 
-  if (c.college.length === 0) {
+  if (c.colleges.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <ul>
-      {c.college.map((college) => (
+      {c.colleges.map((college) => (
         <College college={college} key={college.id} />
       ))}
     </ul>
@@ -49,4 +52,3 @@ const EmptyState = () => {
     </div>
   );
 };
-

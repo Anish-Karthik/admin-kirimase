@@ -19,6 +19,7 @@ import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const UserForm = ({
   user,
@@ -27,7 +28,6 @@ const UserForm = ({
   user?: User;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!user?.id;
 
   const router = useRouter();
@@ -40,43 +40,44 @@ const UserForm = ({
     resolver: zodResolver(insertUserParams),
     defaultValues: user ?? {
       email: "",
-     password: "",
-     name: "",
-     phone: "",
-     role: "",
-     verified: false
+      password: "",
+      name: "",
+      phone: "",
+      role: "",
+      verified: false,
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
-    await utils.user.getUser.invalidate();
+    await utils.user.getUsers.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`User ${action}d!`);
+    toast.success(`User ${action}d!`);
   };
 
   const { mutate: createUser, isLoading: isCreating } =
     trpc.user.createUser.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateUser, isLoading: isUpdating } =
     trpc.user.updateUser.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteUser, isLoading: isDeleting } =
     trpc.user.deleteUser.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -93,11 +94,12 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="email"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Email</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -106,11 +108,12 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="password"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Password</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -119,11 +122,13 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                {/* @ts-expect-error: none */}
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -132,11 +137,13 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="phone"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Phone</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                {/* @ts-expect-error: none */}
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -145,11 +152,12 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="role"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Role</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -158,12 +166,18 @@ const UserForm = ({
         <FormField
           control={form.control}
           name="verified"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Verified</FormLabel>
-                <br />
-            <FormControl>
-              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
-            </FormControl>
+              <br />
+              <FormControl>
+                <Checkbox
+                  {...field}
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  value={""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -5,7 +5,7 @@ import { checkAuth } from "@/lib/auth/utils";
 
 export default async function User() {
   await checkAuth();
-  const { user } = await api.user.getUser.query();  
+  const { user } = await api.user.getUsers.query();  
 
   return (
     <main>

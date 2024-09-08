@@ -1,6 +1,10 @@
 "use client";
 
-import { Holiday, NewHolidayParams, insertHolidayParams } from "@/lib/db/schema/holiday";
+import {
+  Holiday,
+  NewHolidayParams,
+  insertHolidayParams,
+} from "@/lib/db/schema/holiday";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,10 +20,21 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, onError } from "@/lib/utils";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -31,7 +46,7 @@ const HolidayForm = ({
   holiday?: Holiday;
   closeModal?: () => void;
 }) => {
-  const { data: colleges } = trpc.colleges.getColleges.useQuery();
+  const { data: colleges } = trpc.college.getColleges.useQuery();
   const editing = !!holiday?.id;
 
   const router = useRouter();
@@ -44,40 +59,41 @@ const HolidayForm = ({
     resolver: zodResolver(insertHolidayParams),
     defaultValues: holiday ?? {
       name: "",
-     date: new Date(),
-     collegeId: ""
+      date: new Date(),
+      collegeId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.holiday.getHoliday.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Holiday ${action}d!`);
+    toast.success(`Holiday ${action}d!`);
   };
 
   const { mutate: createHoliday, isLoading: isCreating } =
     trpc.holiday.createHoliday.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateHoliday, isLoading: isUpdating } =
     trpc.holiday.updateHoliday.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteHoliday, isLoading: isDeleting } =
     trpc.holiday.deleteHoliday.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -94,11 +110,12 @@ const HolidayForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -107,9 +124,10 @@ const HolidayForm = ({
         <FormField
           control={form.control}
           name="date"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Date</FormLabel>
-                <br />
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -149,9 +167,10 @@ const HolidayForm = ({
         <FormField
           control={form.control}
           name="collegeId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>College Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -161,13 +180,17 @@ const HolidayForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {colleges?.colleges.map((college) => (
-                      <SelectItem key={college.id} value={college.id.toString()}>
-                        {college.id}  {/* TODO: Replace with a field from the college model */}
+                      <SelectItem
+                        key={college.id}
+                        value={college.id.toString()}
+                      >
+                        {college.id}{" "}
+                        {/* TODO: Replace with a field from the college model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
