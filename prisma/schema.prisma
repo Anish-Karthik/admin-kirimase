@@ -108,3 +108,16 @@ model Course {
 
   @@index([userId])
 }
+
+model Student {
+  id        String   @id @default(cuid())
+  name      String
+  regNumber String
+  email     String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([regNumber])
+  @@index([userId])
+}
