@@ -55,10 +55,24 @@ model Subscription {
 }
 
 model College {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   address   String?
   userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  holiday   Holiday[]
+}
+
+model Holiday {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  college   College  @relation(fields: [collegeId], references: [id])
+  collegeId String
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
