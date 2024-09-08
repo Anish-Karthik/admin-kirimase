@@ -9,6 +9,7 @@ import { studentRouter } from "./student";
 import { courseEnrolledStudentRouter } from "./courseEnrolledStudent";
 import { periodRouter } from "./period";
 import { sectionRouter } from "./section";
+import { subjectRouter } from "./subject";
 
 export const appRouter = router({
   computers: computersRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   courseEnrolledStudent: courseEnrolledStudentRouter,
   period: periodRouter,
   section: sectionRouter,
+  subject: subjectRouter,
 });
 
 export type AppRouter = typeof appRouter;
