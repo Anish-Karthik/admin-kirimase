@@ -144,26 +144,28 @@ model CourseEnrolledStudent {
 }
 
 model Day {
-  id        String     @id @default(cuid())
-  name      String
-  userId    String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  schedule  Schedule[]
+  id              String            @id @default(cuid())
+  name            String
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  schedule        Schedule[]
+  ScheduleHistory ScheduleHistory[]
 }
 
 model Period {
-  id        String     @id @default(cuid())
-  startTime DateTime
-  endTime   DateTime
-  version   Int
-  isActive  Boolean
-  course    Course     @relation(fields: [courseId], references: [id])
-  courseId  String
-  userId    String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  Schedule  Schedule[]
+  id              String            @id @default(cuid())
+  startTime       DateTime
+  endTime         DateTime
+  version         Int
+  isActive        Boolean
+  course          Course            @relation(fields: [courseId], references: [id])
+  courseId        String
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Schedule        Schedule[]
+  ScheduleHistory ScheduleHistory[]
 
   @@index([userId])
 }
@@ -243,33 +245,52 @@ model Faculty {
 }
 
 model FacultySubject {
-  id        String     @id @default(cuid())
-  subject   Subject    @relation(fields: [subjectId], references: [id])
-  subjectId String
-  faculty   Faculty    @relation(fields: [facultyId], references: [id])
-  facultyId String
-  userId    String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  Schedule  Schedule[]
+  id              String            @id @default(cuid())
+  subject         Subject           @relation(fields: [subjectId], references: [id])
+  subjectId       String
+  faculty         Faculty           @relation(fields: [facultyId], references: [id])
+  facultyId       String
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Schedule        Schedule[]
+  ScheduleHistory ScheduleHistory[]
 
   @@index([userId])
 }
 
 model Schedule {
+  id               String            @id @default(cuid())
+  day              Day               @relation(fields: [dayId], references: [id])
+  dayId            String
+  period           Period            @relation(fields: [periodId], references: [id])
+  periodId         String
+  facultySubject   FacultySubject    @relation(fields: [facultySubjectId], references: [id])
+  facultySubjectId String
+  section          Section           @relation(fields: [sectionId], references: [id])
+  sectionId        String
+  version          Int
+  isActive         Boolean
+  isDeleted        Boolean
+  isArchived       Boolean
+  userId           String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  scheduleHistory  ScheduleHistory[]
+
+  @@index([userId])
+}
+
+model ScheduleHistory {
   id               String         @id @default(cuid())
+  schedule         Schedule       @relation(fields: [scheduleId], references: [id])
+  scheduleId       String
   day              Day            @relation(fields: [dayId], references: [id])
   dayId            String
   period           Period         @relation(fields: [periodId], references: [id])
   periodId         String
   facultySubject   FacultySubject @relation(fields: [facultySubjectId], references: [id])
   facultySubjectId String
-  section          Section        @relation(fields: [sectionId], references: [id])
-  sectionId        String
-  version          Int
-  isActive         Boolean
-  isDeleted        Boolean
-  isArchived       Boolean
   userId           String
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
