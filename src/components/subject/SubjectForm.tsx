@@ -1,6 +1,10 @@
 "use client";
 
-import { Subject, NewSubjectParams, insertSubjectParams } from "@/lib/db/schema/subject";
+import {
+  Subject,
+  NewSubjectParams,
+  insertSubjectParams,
+} from "@/lib/db/schema/subject";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -18,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const SubjectForm = ({
   subject,
@@ -26,7 +31,6 @@ const SubjectForm = ({
   subject?: Subject;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!subject?.id;
 
   const router = useRouter();
@@ -39,40 +43,41 @@ const SubjectForm = ({
     resolver: zodResolver(insertSubjectParams),
     defaultValues: subject ?? {
       name: "",
-     code: "",
-     electiveName: ""
+      code: "",
+      electiveName: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.subject.getSubject.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Subject ${action}d!`);
+    toast.success(`Subject ${action}d!`);
   };
 
   const { mutate: createSubject, isLoading: isCreating } =
     trpc.subject.createSubject.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateSubject, isLoading: isUpdating } =
     trpc.subject.updateSubject.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteSubject, isLoading: isDeleting } =
     trpc.subject.deleteSubject.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -89,11 +94,12 @@ const SubjectForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -102,11 +108,12 @@ const SubjectForm = ({
         <FormField
           control={form.control}
           name="code"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Code</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -115,12 +122,13 @@ const SubjectForm = ({
         <FormField
           control={form.control}
           name="electiveName"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Elective Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
-
+              <FormControl>
+                <Input {...field} value={field.value ?? ""} />
+              </FormControl>
+        
               <FormMessage />
             </FormItem>
           )}

@@ -1,6 +1,10 @@
 "use client";
 
-import { Schedule, NewScheduleParams, insertScheduleParams } from "@/lib/db/schema/schedule";
+import {
+  Schedule,
+  NewScheduleParams,
+  insertScheduleParams,
+} from "@/lib/db/schema/schedule";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -17,9 +21,16 @@ import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const ScheduleForm = ({
   schedule,
@@ -28,10 +39,11 @@ const ScheduleForm = ({
   schedule?: Schedule;
   closeModal?: () => void;
 }) => {
-  const { data: days } = trpc.days.getDays.useQuery();
-  const { data: periods } = trpc.periods.getPeriods.useQuery();
-  const { data: facultySubjects } = trpc.facultySubjects.getFacultySubjects.useQuery();
-  const { data: sections } = trpc.sections.getSections.useQuery();
+  const { data: days } = trpc.day.getDay.useQuery();
+  const { data: periods } = trpc.period.getPeriod.useQuery();
+  const { data: facultySubjects } =
+    trpc.facultySubject.getFacultySubject.useQuery();
+  const { data: sections } = trpc.section.getSection.useQuery();
   const editing = !!schedule?.id;
 
   const router = useRouter();
@@ -44,45 +56,46 @@ const ScheduleForm = ({
     resolver: zodResolver(insertScheduleParams),
     defaultValues: schedule ?? {
       dayId: "",
-     periodId: "",
-     facultySubjectId: "",
-     sectionId: "",
-     version: 0,
-     isActive: false,
-     isDeleted: false,
-     isArchived: false
+      periodId: "",
+      facultySubjectId: "",
+      sectionId: "",
+      version: 0,
+      isActive: false,
+      isDeleted: false,
+      isArchived: false,
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.schedule.getSchedule.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Schedule ${action}d!`);
+    toast.success(`Schedule ${action}d!`);
   };
 
   const { mutate: createSchedule, isLoading: isCreating } =
     trpc.schedule.createSchedule.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateSchedule, isLoading: isUpdating } =
     trpc.schedule.updateSchedule.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteSchedule, isLoading: isDeleting } =
     trpc.schedule.deleteSchedule.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -99,9 +112,10 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="dayId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Day Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -110,14 +124,15 @@ const ScheduleForm = ({
                     <SelectValue placeholder="Select a day" />
                   </SelectTrigger>
                   <SelectContent>
-                    {days?.days.map((day) => (
+                    {days?.day.map((day) => (
                       <SelectItem key={day.id} value={day.id.toString()}>
-                        {day.id}  {/* TODO: Replace with a field from the day model */}
+                        {day.id}{" "}
+                        {/* TODO: Replace with a field from the day model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -126,9 +141,10 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="periodId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Period Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -137,14 +153,15 @@ const ScheduleForm = ({
                     <SelectValue placeholder="Select a period" />
                   </SelectTrigger>
                   <SelectContent>
-                    {periods?.periods.map((period) => (
+                    {periods?.period.map((period) => (
                       <SelectItem key={period.id} value={period.id.toString()}>
-                        {period.id}  {/* TODO: Replace with a field from the period model */}
+                        {period.id}{" "}
+                        {/* TODO: Replace with a field from the period model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -153,9 +170,10 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="facultySubjectId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Faculty Subject Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -164,14 +182,18 @@ const ScheduleForm = ({
                     <SelectValue placeholder="Select a faculty subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    {facultySubjects?.facultySubjects.map((facultySubject) => (
-                      <SelectItem key={facultySubject.id} value={facultySubject.id.toString()}>
-                        {facultySubject.id}  {/* TODO: Replace with a field from the facultySubject model */}
+                    {facultySubjects?.facultySubject.map((facultySubject) => (
+                      <SelectItem
+                        key={facultySubject.id}
+                        value={facultySubject.id.toString()}
+                      >
+                        {facultySubject.id}{" "}
+                        {/* TODO: Replace with a field from the facultySubject model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -180,9 +202,10 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="sectionId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Section Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -191,14 +214,18 @@ const ScheduleForm = ({
                     <SelectValue placeholder="Select a section" />
                   </SelectTrigger>
                   <SelectContent>
-                    {sections?.sections.map((section) => (
-                      <SelectItem key={section.id} value={section.id.toString()}>
-                        {section.id}  {/* TODO: Replace with a field from the section model */}
+                    {sections?.section.map((section) => (
+                      <SelectItem
+                        key={section.id}
+                        value={section.id.toString()}
+                      >
+                        {section.id}{" "}
+                        {/* TODO: Replace with a field from the section model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -207,11 +234,12 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="version"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Version</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -220,12 +248,18 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="isActive"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Is Active</FormLabel>
-                <br />
-            <FormControl>
-              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
-            </FormControl>
+              <br />
+              <FormControl>
+                <Checkbox
+                  {...field}
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  value={""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -233,12 +267,18 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="isDeleted"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Is Deleted</FormLabel>
-                <br />
-            <FormControl>
-              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
-            </FormControl>
+              <br />
+              <FormControl>
+                <Checkbox
+                  {...field}
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  value={""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -246,12 +286,18 @@ const ScheduleForm = ({
         <FormField
           control={form.control}
           name="isArchived"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Is Archived</FormLabel>
-                <br />
-            <FormControl>
-              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
-            </FormControl>
+              <br />
+              <FormControl>
+                <Checkbox
+                  {...field}
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  value={""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

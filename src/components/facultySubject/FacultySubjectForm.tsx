@@ -1,6 +1,10 @@
 "use client";
 
-import { FacultySubject, NewFacultySubjectParams, insertFacultySubjectParams } from "@/lib/db/schema/facultySubject";
+import {
+  FacultySubject,
+  NewFacultySubjectParams,
+  insertFacultySubjectParams,
+} from "@/lib/db/schema/facultySubject";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -12,13 +16,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const FacultySubjectForm = ({
   facultySubject,
@@ -27,8 +38,8 @@ const FacultySubjectForm = ({
   facultySubject?: FacultySubject;
   closeModal?: () => void;
 }) => {
-  const { data: subjects } = trpc.subjects.getSubjects.useQuery();
-  const { data: faculties } = trpc.faculties.getFaculties.useQuery();
+  const { data: subjects } = trpc.subject.getSubject.useQuery();
+  const { data: faculties } = trpc.faculty.getFaculty.useQuery();
   const editing = !!facultySubject?.id;
 
   const router = useRouter();
@@ -41,39 +52,40 @@ const FacultySubjectForm = ({
     resolver: zodResolver(insertFacultySubjectParams),
     defaultValues: facultySubject ?? {
       subjectId: "",
-     facultyId: ""
+      facultyId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.facultySubject.getFacultySubject.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Faculty Subject ${action}d!`);
+    toast.success(`Faculty Subject ${action}d!`);
   };
 
   const { mutate: createFacultySubject, isLoading: isCreating } =
     trpc.facultySubject.createFacultySubject.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateFacultySubject, isLoading: isUpdating } =
     trpc.facultySubject.updateFacultySubject.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteFacultySubject, isLoading: isDeleting } =
     trpc.facultySubject.deleteFacultySubject.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -90,9 +102,10 @@ const FacultySubjectForm = ({
         <FormField
           control={form.control}
           name="subjectId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Subject Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -101,14 +114,18 @@ const FacultySubjectForm = ({
                     <SelectValue placeholder="Select a subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subjects?.subjects.map((subject) => (
-                      <SelectItem key={subject.id} value={subject.id.toString()}>
-                        {subject.id}  {/* TODO: Replace with a field from the subject model */}
+                    {subjects?.subject.map((subject) => (
+                      <SelectItem
+                        key={subject.id}
+                        value={subject.id.toString()}
+                      >
+                        {subject.id}{" "}
+                        {/* TODO: Replace with a field from the subject model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -117,9 +134,10 @@ const FacultySubjectForm = ({
         <FormField
           control={form.control}
           name="facultyId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Faculty Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -128,14 +146,18 @@ const FacultySubjectForm = ({
                     <SelectValue placeholder="Select a faculty" />
                   </SelectTrigger>
                   <SelectContent>
-                    {faculties?.faculties.map((faculty) => (
-                      <SelectItem key={faculty.id} value={faculty.id.toString()}>
-                        {faculty.id}  {/* TODO: Replace with a field from the faculty model */}
+                    {faculties?.faculty.map((faculty) => (
+                      <SelectItem
+                        key={faculty.id}
+                        value={faculty.id.toString()}
+                      >
+                        {faculty.id}{" "}
+                        {/* TODO: Replace with a field from the faculty model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

@@ -1,6 +1,10 @@
 "use client";
 
-import { Period, NewPeriodParams, insertPeriodParams } from "@/lib/db/schema/period";
+import {
+  Period,
+  NewPeriodParams,
+  insertPeriodParams,
+} from "@/lib/db/schema/period";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -17,10 +21,21 @@ import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, onError } from "@/lib/utils";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -32,7 +47,7 @@ const PeriodForm = ({
   period?: Period;
   closeModal?: () => void;
 }) => {
-  const { data: courses } = trpc.courses.getCourses.useQuery();
+  const { data: courses } = trpc.course.getCourse.useQuery();
   const editing = !!period?.id;
 
   const router = useRouter();
@@ -45,42 +60,43 @@ const PeriodForm = ({
     resolver: zodResolver(insertPeriodParams),
     defaultValues: period ?? {
       startTime: new Date(),
-     endTime: new Date(),
-     version: 0,
-     isActive: false,
-     courseId: ""
+      endTime: new Date(),
+      version: 0,
+      isActive: false,
+      courseId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.period.getPeriod.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Period ${action}d!`);
+    toast.success(`Period ${action}d!`);
   };
 
   const { mutate: createPeriod, isLoading: isCreating } =
     trpc.period.createPeriod.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updatePeriod, isLoading: isUpdating } =
     trpc.period.updatePeriod.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deletePeriod, isLoading: isDeleting } =
     trpc.period.deletePeriod.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -97,9 +113,10 @@ const PeriodForm = ({
         <FormField
           control={form.control}
           name="startTime"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Start Time</FormLabel>
-                <br />
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -139,9 +156,10 @@ const PeriodForm = ({
         <FormField
           control={form.control}
           name="endTime"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>End Time</FormLabel>
-                <br />
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -181,11 +199,12 @@ const PeriodForm = ({
         <FormField
           control={form.control}
           name="version"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Version</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -194,12 +213,18 @@ const PeriodForm = ({
         <FormField
           control={form.control}
           name="isActive"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Is Active</FormLabel>
-                <br />
-            <FormControl>
-              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
-            </FormControl>
+              <br />
+              <FormControl>
+                <Checkbox
+                  {...field}
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  value={""}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -207,9 +232,10 @@ const PeriodForm = ({
         <FormField
           control={form.control}
           name="courseId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Course Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -218,14 +244,15 @@ const PeriodForm = ({
                     <SelectValue placeholder="Select a course" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses?.courses.map((course) => (
+                    {courses?.course.map((course) => (
                       <SelectItem key={course.id} value={course.id.toString()}>
-                        {course.id}  {/* TODO: Replace with a field from the course model */}
+                        {course.id}{" "}
+                        {/* TODO: Replace with a field from the course model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

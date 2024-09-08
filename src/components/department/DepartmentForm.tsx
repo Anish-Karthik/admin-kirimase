@@ -1,6 +1,10 @@
 "use client";
 
-import { Department, NewDepartmentParams, insertDepartmentParams } from "@/lib/db/schema/department";
+import {
+  Department,
+  NewDepartmentParams,
+  insertDepartmentParams,
+} from "@/lib/db/schema/department";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,9 +20,16 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const DepartmentForm = ({
   department,
@@ -27,7 +38,7 @@ const DepartmentForm = ({
   department?: Department;
   closeModal?: () => void;
 }) => {
-  const { data: colleges } = trpc.colleges.getColleges.useQuery();
+  const { data: colleges } = trpc.college.getColleges.useQuery();
   const editing = !!department?.id;
 
   const router = useRouter();
@@ -40,40 +51,41 @@ const DepartmentForm = ({
     resolver: zodResolver(insertDepartmentParams),
     defaultValues: department ?? {
       name: "",
-     code: "",
-     collegeId: ""
+      code: "",
+      collegeId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
-    await utils.department.getDepartment.invalidate();
+    await utils.department.getDepartments.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Department ${action}d!`);
+    toast.success(`Department ${action}d!`);
   };
 
   const { mutate: createDepartment, isLoading: isCreating } =
     trpc.department.createDepartment.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateDepartment, isLoading: isUpdating } =
     trpc.department.updateDepartment.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteDepartment, isLoading: isDeleting } =
     trpc.department.deleteDepartment.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -90,11 +102,12 @@ const DepartmentForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -103,11 +116,12 @@ const DepartmentForm = ({
         <FormField
           control={form.control}
           name="code"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Code</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -116,9 +130,10 @@ const DepartmentForm = ({
         <FormField
           control={form.control}
           name="collegeId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>College Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -128,13 +143,17 @@ const DepartmentForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {colleges?.colleges.map((college) => (
-                      <SelectItem key={college.id} value={college.id.toString()}>
-                        {college.id}  {/* TODO: Replace with a field from the college model */}
+                      <SelectItem
+                        key={college.id}
+                        value={college.id.toString()}
+                      >
+                        {college.id}{" "}
+                        {/* TODO: Replace with a field from the college model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

@@ -1,17 +1,22 @@
 import { db } from "@/lib/db/index";
-import { 
-  AttendanceRecordId, 
+import {
+  AttendanceRecordId,
   NewAttendanceRecordParams,
-  UpdateAttendanceRecordParams, 
+  UpdateAttendanceRecordParams,
   updateAttendanceRecordSchema,
-  insertAttendanceRecordSchema, 
-  attendanceRecordIdSchema 
+  insertAttendanceRecordSchema,
+  attendanceRecordIdSchema,
 } from "@/lib/db/schema/attendanceRecord";
 import { getUserAuth } from "@/lib/auth/utils";
 
-export const createAttendanceRecord = async (attendanceRecord: NewAttendanceRecordParams) => {
+export const createAttendanceRecord = async (
+  attendanceRecord: NewAttendanceRecordParams
+) => {
   const { session } = await getUserAuth();
-  const newAttendanceRecord = insertAttendanceRecordSchema.parse({ ...attendanceRecord, userId: session?.user.id! });
+  const newAttendanceRecord = insertAttendanceRecordSchema.parse({
+    ...attendanceRecord,
+    userId: session?.user.id,
+  });
   try {
     const a = await db.attendanceRecord.create({ data: newAttendanceRecord });
     return { attendanceRecord: a };
@@ -22,12 +27,21 @@ export const createAttendanceRecord = async (attendanceRecord: NewAttendanceReco
   }
 };
 
-export const updateAttendanceRecord = async (id: AttendanceRecordId, attendanceRecord: UpdateAttendanceRecordParams) => {
+export const updateAttendanceRecord = async (
+  id: AttendanceRecordId,
+  attendanceRecord: UpdateAttendanceRecordParams
+) => {
   const { session } = await getUserAuth();
   const { id: attendanceRecordId } = attendanceRecordIdSchema.parse({ id });
-  const newAttendanceRecord = updateAttendanceRecordSchema.parse({ ...attendanceRecord, userId: session?.user.id! });
+  const newAttendanceRecord = updateAttendanceRecordSchema.parse({
+    ...attendanceRecord,
+    userId: session?.user.id,
+  });
   try {
-    const a = await db.attendanceRecord.update({ where: { id: attendanceRecordId, userId: session?.user.id! }, data: newAttendanceRecord})
+    const a = await db.attendanceRecord.update({
+      where: { id: attendanceRecordId, userId: session?.user.id },
+      data: newAttendanceRecord,
+    });
     return { attendanceRecord: a };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -40,7 +54,9 @@ export const deleteAttendanceRecord = async (id: AttendanceRecordId) => {
   const { session } = await getUserAuth();
   const { id: attendanceRecordId } = attendanceRecordIdSchema.parse({ id });
   try {
-    const a = await db.attendanceRecord.delete({ where: { id: attendanceRecordId, userId: session?.user.id! }})
+    const a = await db.attendanceRecord.delete({
+      where: { id: attendanceRecordId, userId: session?.user.id },
+    });
     return { attendanceRecord: a };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -48,4 +64,3 @@ export const deleteAttendanceRecord = async (id: AttendanceRecordId) => {
     throw { error: message };
   }
 };
-

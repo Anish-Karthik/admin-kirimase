@@ -1,6 +1,10 @@
 "use client";
 
-import { ElectiveSubject, NewElectiveSubjectParams, insertElectiveSubjectParams } from "@/lib/db/schema/electiveSubject";
+import {
+  ElectiveSubject,
+  NewElectiveSubjectParams,
+  insertElectiveSubjectParams,
+} from "@/lib/db/schema/electiveSubject";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -12,13 +16,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const ElectiveSubjectForm = ({
   electiveSubject,
@@ -27,9 +38,10 @@ const ElectiveSubjectForm = ({
   electiveSubject?: ElectiveSubject;
   closeModal?: () => void;
 }) => {
-  const { data: courseEnrolledStudents } = trpc.courseEnrolledStudents.getCourseEnrolledStudents.useQuery();
-  const { data: subjects } = trpc.subjects.getSubjects.useQuery();
-  const { data: sections } = trpc.sections.getSections.useQuery();
+  const { data: courseEnrolledStudents } =
+    trpc.courseEnrolledStudent.getCourseEnrolledStudent.useQuery();
+  const { data: subjects } = trpc.subject.getSubject.useQuery();
+  const { data: sections } = trpc.section.getSection.useQuery();
   const editing = !!electiveSubject?.id;
 
   const router = useRouter();
@@ -42,40 +54,41 @@ const ElectiveSubjectForm = ({
     resolver: zodResolver(insertElectiveSubjectParams),
     defaultValues: electiveSubject ?? {
       courseEnrolledStudentId: "",
-     subjectId: "",
-     sectionId: ""
+      subjectId: "",
+      sectionId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.electiveSubject.getElectiveSubject.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Elective Subject ${action}d!`);
+    toast.success(`Elective Subject ${action}d!`);
   };
 
   const { mutate: createElectiveSubject, isLoading: isCreating } =
     trpc.electiveSubject.createElectiveSubject.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateElectiveSubject, isLoading: isUpdating } =
     trpc.electiveSubject.updateElectiveSubject.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteElectiveSubject, isLoading: isDeleting } =
     trpc.electiveSubject.deleteElectiveSubject.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -92,9 +105,10 @@ const ElectiveSubjectForm = ({
         <FormField
           control={form.control}
           name="courseEnrolledStudentId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Course Enrolled Student Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -103,14 +117,20 @@ const ElectiveSubjectForm = ({
                     <SelectValue placeholder="Select a course enrolled student" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courseEnrolledStudents?.courseEnrolledStudents.map((courseEnrolledStudent) => (
-                      <SelectItem key={courseEnrolledStudent.id} value={courseEnrolledStudent.id.toString()}>
-                        {courseEnrolledStudent.id}  {/* TODO: Replace with a field from the courseEnrolledStudent model */}
-                      </SelectItem>
-                    ))}
+                    {courseEnrolledStudents?.courseEnrolledStudent.map(
+                      (courseEnrolledStudent) => (
+                        <SelectItem
+                          key={courseEnrolledStudent.id}
+                          value={courseEnrolledStudent.id.toString()}
+                        >
+                          {courseEnrolledStudent.id}{" "}
+                          {/* TODO: Replace with a field from the courseEnrolledStudent model */}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -119,9 +139,10 @@ const ElectiveSubjectForm = ({
         <FormField
           control={form.control}
           name="subjectId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Subject Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -130,14 +151,18 @@ const ElectiveSubjectForm = ({
                     <SelectValue placeholder="Select a subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subjects?.subjects.map((subject) => (
-                      <SelectItem key={subject.id} value={subject.id.toString()}>
-                        {subject.id}  {/* TODO: Replace with a field from the subject model */}
+                    {subjects?.subject.map((subject) => (
+                      <SelectItem
+                        key={subject.id}
+                        value={subject.id.toString()}
+                      >
+                        {subject.id}{" "}
+                        {/* TODO: Replace with a field from the subject model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -146,9 +171,10 @@ const ElectiveSubjectForm = ({
         <FormField
           control={form.control}
           name="sectionId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Section Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -157,14 +183,18 @@ const ElectiveSubjectForm = ({
                     <SelectValue placeholder="Select a section" />
                   </SelectTrigger>
                   <SelectContent>
-                    {sections?.sections.map((section) => (
-                      <SelectItem key={section.id} value={section.id.toString()}>
-                        {section.id}  {/* TODO: Replace with a field from the section model */}
+                    {sections?.section.map((section) => (
+                      <SelectItem
+                        key={section.id}
+                        value={section.id.toString()}
+                      >
+                        {section.id}{" "}
+                        {/* TODO: Replace with a field from the section model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

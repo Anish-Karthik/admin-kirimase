@@ -17,8 +17,10 @@ import { facultySubjectRouter } from "./facultySubject";
 import { scheduleRouter } from "./schedule";
 import { scheduleHistoryRouter } from "./scheduleHistory";
 import { attendanceRecordRouter } from "./attendanceRecord";
+import { dayRouter } from "./day";
 
 export const appRouter = router({
+  day: dayRouter,
   computers: computersRouter,
   user: userRouter,
   college: collegeRouter,

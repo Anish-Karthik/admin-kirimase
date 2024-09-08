@@ -1,19 +1,26 @@
 import { db } from "@/lib/db/index";
-import { 
-  CourseEnrolledStudentId, 
+import {
+  CourseEnrolledStudentId,
   NewCourseEnrolledStudentParams,
-  UpdateCourseEnrolledStudentParams, 
+  UpdateCourseEnrolledStudentParams,
   updateCourseEnrolledStudentSchema,
-  insertCourseEnrolledStudentSchema, 
-  courseEnrolledStudentIdSchema 
+  insertCourseEnrolledStudentSchema,
+  courseEnrolledStudentIdSchema,
 } from "@/lib/db/schema/courseEnrolledStudent";
 import { getUserAuth } from "@/lib/auth/utils";
 
-export const createCourseEnrolledStudent = async (courseEnrolledStudent: NewCourseEnrolledStudentParams) => {
+export const createCourseEnrolledStudent = async (
+  courseEnrolledStudent: NewCourseEnrolledStudentParams
+) => {
   const { session } = await getUserAuth();
-  const newCourseEnrolledStudent = insertCourseEnrolledStudentSchema.parse({ ...courseEnrolledStudent, userId: session?.user.id! });
+  const newCourseEnrolledStudent = insertCourseEnrolledStudentSchema.parse({
+    ...courseEnrolledStudent,
+    userId: session?.user.id,
+  });
   try {
-    const c = await db.courseEnrolledStudent.create({ data: newCourseEnrolledStudent });
+    const c = await db.courseEnrolledStudent.create({
+      data: newCourseEnrolledStudent,
+    });
     return { courseEnrolledStudent: c };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -22,12 +29,23 @@ export const createCourseEnrolledStudent = async (courseEnrolledStudent: NewCour
   }
 };
 
-export const updateCourseEnrolledStudent = async (id: CourseEnrolledStudentId, courseEnrolledStudent: UpdateCourseEnrolledStudentParams) => {
+export const updateCourseEnrolledStudent = async (
+  id: CourseEnrolledStudentId,
+  courseEnrolledStudent: UpdateCourseEnrolledStudentParams
+) => {
   const { session } = await getUserAuth();
-  const { id: courseEnrolledStudentId } = courseEnrolledStudentIdSchema.parse({ id });
-  const newCourseEnrolledStudent = updateCourseEnrolledStudentSchema.parse({ ...courseEnrolledStudent, userId: session?.user.id! });
+  const { id: courseEnrolledStudentId } = courseEnrolledStudentIdSchema.parse({
+    id,
+  });
+  const newCourseEnrolledStudent = updateCourseEnrolledStudentSchema.parse({
+    ...courseEnrolledStudent,
+    userId: session?.user.id,
+  });
   try {
-    const c = await db.courseEnrolledStudent.update({ where: { id: courseEnrolledStudentId, userId: session?.user.id! }, data: newCourseEnrolledStudent})
+    const c = await db.courseEnrolledStudent.update({
+      where: { id: courseEnrolledStudentId, userId: session?.user.id },
+      data: newCourseEnrolledStudent,
+    });
     return { courseEnrolledStudent: c };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -36,11 +54,17 @@ export const updateCourseEnrolledStudent = async (id: CourseEnrolledStudentId, c
   }
 };
 
-export const deleteCourseEnrolledStudent = async (id: CourseEnrolledStudentId) => {
+export const deleteCourseEnrolledStudent = async (
+  id: CourseEnrolledStudentId
+) => {
   const { session } = await getUserAuth();
-  const { id: courseEnrolledStudentId } = courseEnrolledStudentIdSchema.parse({ id });
+  const { id: courseEnrolledStudentId } = courseEnrolledStudentIdSchema.parse({
+    id,
+  });
   try {
-    const c = await db.courseEnrolledStudent.delete({ where: { id: courseEnrolledStudentId, userId: session?.user.id! }})
+    const c = await db.courseEnrolledStudent.delete({
+      where: { id: courseEnrolledStudentId, userId: session?.user.id },
+    });
     return { courseEnrolledStudent: c };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -48,4 +72,3 @@ export const deleteCourseEnrolledStudent = async (id: CourseEnrolledStudentId) =
     throw { error: message };
   }
 };
-

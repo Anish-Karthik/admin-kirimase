@@ -1,6 +1,10 @@
 "use client";
 
-import { ScheduleHistory, NewScheduleHistoryParams, insertScheduleHistoryParams } from "@/lib/db/schema/scheduleHistory";
+import {
+  ScheduleHistory,
+  NewScheduleHistoryParams,
+  insertScheduleHistoryParams,
+} from "@/lib/db/schema/scheduleHistory";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -12,13 +16,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const ScheduleHistoryForm = ({
   scheduleHistory,
@@ -27,10 +38,11 @@ const ScheduleHistoryForm = ({
   scheduleHistory?: ScheduleHistory;
   closeModal?: () => void;
 }) => {
-  const { data: schedules } = trpc.schedules.getSchedules.useQuery();
-  const { data: days } = trpc.days.getDays.useQuery();
-  const { data: periods } = trpc.periods.getPeriods.useQuery();
-  const { data: facultySubjects } = trpc.facultySubjects.getFacultySubjects.useQuery();
+  const { data: schedules } = trpc.schedule.getSchedule.useQuery();
+  const { data: days } = trpc.day.getDay.useQuery();
+  const { data: periods } = trpc.period.getPeriod.useQuery();
+  const { data: facultySubjects } =
+    trpc.facultySubject.getFacultySubject.useQuery();
   const editing = !!scheduleHistory?.id;
 
   const router = useRouter();
@@ -43,41 +55,42 @@ const ScheduleHistoryForm = ({
     resolver: zodResolver(insertScheduleHistoryParams),
     defaultValues: scheduleHistory ?? {
       scheduleId: "",
-     dayId: "",
-     periodId: "",
-     facultySubjectId: ""
+      dayId: "",
+      periodId: "",
+      facultySubjectId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.scheduleHistory.getScheduleHistory.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Schedule History ${action}d!`);
+    toast.success(`Schedule History ${action}d!`);
   };
 
   const { mutate: createScheduleHistory, isLoading: isCreating } =
     trpc.scheduleHistory.createScheduleHistory.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateScheduleHistory, isLoading: isUpdating } =
     trpc.scheduleHistory.updateScheduleHistory.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteScheduleHistory, isLoading: isDeleting } =
     trpc.scheduleHistory.deleteScheduleHistory.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -94,9 +107,10 @@ const ScheduleHistoryForm = ({
         <FormField
           control={form.control}
           name="scheduleId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Schedule Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -105,14 +119,18 @@ const ScheduleHistoryForm = ({
                     <SelectValue placeholder="Select a schedule" />
                   </SelectTrigger>
                   <SelectContent>
-                    {schedules?.schedules.map((schedule) => (
-                      <SelectItem key={schedule.id} value={schedule.id.toString()}>
-                        {schedule.id}  {/* TODO: Replace with a field from the schedule model */}
+                    {schedules?.schedule.map((schedule) => (
+                      <SelectItem
+                        key={schedule.id}
+                        value={schedule.id.toString()}
+                      >
+                        {schedule.id}{" "}
+                        {/* TODO: Replace with a field from the schedule model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -121,9 +139,10 @@ const ScheduleHistoryForm = ({
         <FormField
           control={form.control}
           name="dayId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Day Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -132,14 +151,15 @@ const ScheduleHistoryForm = ({
                     <SelectValue placeholder="Select a day" />
                   </SelectTrigger>
                   <SelectContent>
-                    {days?.days.map((day) => (
+                    {days?.day.map((day) => (
                       <SelectItem key={day.id} value={day.id.toString()}>
-                        {day.id}  {/* TODO: Replace with a field from the day model */}
+                        {day.id}{" "}
+                        {/* TODO: Replace with a field from the day model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -148,9 +168,10 @@ const ScheduleHistoryForm = ({
         <FormField
           control={form.control}
           name="periodId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Period Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -159,14 +180,15 @@ const ScheduleHistoryForm = ({
                     <SelectValue placeholder="Select a period" />
                   </SelectTrigger>
                   <SelectContent>
-                    {periods?.periods.map((period) => (
+                    {periods?.period.map((period) => (
                       <SelectItem key={period.id} value={period.id.toString()}>
-                        {period.id}  {/* TODO: Replace with a field from the period model */}
+                        {period.id}{" "}
+                        {/* TODO: Replace with a field from the period model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -175,9 +197,10 @@ const ScheduleHistoryForm = ({
         <FormField
           control={form.control}
           name="facultySubjectId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Faculty Subject Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -186,14 +209,18 @@ const ScheduleHistoryForm = ({
                     <SelectValue placeholder="Select a faculty subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    {facultySubjects?.facultySubjects.map((facultySubject) => (
-                      <SelectItem key={facultySubject.id} value={facultySubject.id.toString()}>
-                        {facultySubject.id}  {/* TODO: Replace with a field from the facultySubject model */}
+                    {facultySubjects?.facultySubject.map((facultySubject) => (
+                      <SelectItem
+                        key={facultySubject.id}
+                        value={facultySubject.id.toString()}
+                      >
+                        {facultySubject.id}{" "}
+                        {/* TODO: Replace with a field from the facultySubject model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

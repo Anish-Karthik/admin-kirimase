@@ -1,6 +1,10 @@
 "use client";
 
-import { Student, NewStudentParams, insertStudentParams } from "@/lib/db/schema/student";
+import {
+  Student,
+  NewStudentParams,
+  insertStudentParams,
+} from "@/lib/db/schema/student";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -18,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const StudentForm = ({
   student,
@@ -26,7 +31,6 @@ const StudentForm = ({
   student?: Student;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!student?.id;
 
   const router = useRouter();
@@ -39,40 +43,41 @@ const StudentForm = ({
     resolver: zodResolver(insertStudentParams),
     defaultValues: student ?? {
       name: "",
-     regNumber: "",
-     email: ""
+      regNumber: "",
+      email: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.student.getStudent.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Student ${action}d!`);
+    toast.success(`Student ${action}d!`);
   };
 
   const { mutate: createStudent, isLoading: isCreating } =
     trpc.student.createStudent.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateStudent, isLoading: isUpdating } =
     trpc.student.updateStudent.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteStudent, isLoading: isDeleting } =
     trpc.student.deleteStudent.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -89,11 +94,12 @@ const StudentForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -102,11 +108,12 @@ const StudentForm = ({
         <FormField
           control={form.control}
           name="regNumber"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Reg Number</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -115,11 +122,12 @@ const StudentForm = ({
         <FormField
           control={form.control}
           name="email"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Email</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>

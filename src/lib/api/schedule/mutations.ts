@@ -1,17 +1,20 @@
 import { db } from "@/lib/db/index";
-import { 
-  ScheduleId, 
+import {
+  ScheduleId,
   NewScheduleParams,
-  UpdateScheduleParams, 
+  UpdateScheduleParams,
   updateScheduleSchema,
-  insertScheduleSchema, 
-  scheduleIdSchema 
+  insertScheduleSchema,
+  scheduleIdSchema,
 } from "@/lib/db/schema/schedule";
 import { getUserAuth } from "@/lib/auth/utils";
 
 export const createSchedule = async (schedule: NewScheduleParams) => {
   const { session } = await getUserAuth();
-  const newSchedule = insertScheduleSchema.parse({ ...schedule, userId: session?.user.id! });
+  const newSchedule = insertScheduleSchema.parse({
+    ...schedule,
+    userId: session?.user.id,
+  });
   try {
     const s = await db.schedule.create({ data: newSchedule });
     return { schedule: s };
@@ -22,12 +25,21 @@ export const createSchedule = async (schedule: NewScheduleParams) => {
   }
 };
 
-export const updateSchedule = async (id: ScheduleId, schedule: UpdateScheduleParams) => {
+export const updateSchedule = async (
+  id: ScheduleId,
+  schedule: UpdateScheduleParams
+) => {
   const { session } = await getUserAuth();
   const { id: scheduleId } = scheduleIdSchema.parse({ id });
-  const newSchedule = updateScheduleSchema.parse({ ...schedule, userId: session?.user.id! });
+  const newSchedule = updateScheduleSchema.parse({
+    ...schedule,
+    userId: session?.user.id,
+  });
   try {
-    const s = await db.schedule.update({ where: { id: scheduleId, userId: session?.user.id! }, data: newSchedule})
+    const s = await db.schedule.update({
+      where: { id: scheduleId, userId: session?.user.id },
+      data: newSchedule,
+    });
     return { schedule: s };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -40,7 +52,9 @@ export const deleteSchedule = async (id: ScheduleId) => {
   const { session } = await getUserAuth();
   const { id: scheduleId } = scheduleIdSchema.parse({ id });
   try {
-    const s = await db.schedule.delete({ where: { id: scheduleId, userId: session?.user.id! }})
+    const s = await db.schedule.delete({
+      where: { id: scheduleId, userId: session?.user.id },
+    });
     return { schedule: s };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -48,4 +62,3 @@ export const deleteSchedule = async (id: ScheduleId) => {
     throw { error: message };
   }
 };
-

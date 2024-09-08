@@ -1,4 +1,4 @@
-import { getHolidayById, getHolidays } from "@/lib/api/holiday/queries";
+import { getHolidayById, getHoliday } from "@/lib/api/holiday/queries";
 import { publicProcedure, router } from "@/lib/server/trpc";
 import {
   holidayIdSchema,
@@ -13,7 +13,7 @@ import {
 
 export const holidayRouter = router({
   getHoliday: publicProcedure.query(async () => {
-    return getHolidays();
+    return getHoliday();
   }),
   getHolidayById: publicProcedure
     .input(holidayIdSchema)

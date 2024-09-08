@@ -1,7 +1,7 @@
 import { holidaySchema } from "@/zodAutoGenSchemas";
 import { z } from "zod";
 import { timestamps } from "@/lib/utils";
-import { getHolidays } from "@/lib/api/holiday/queries";
+import { getHoliday } from "@/lib/api/holiday/queries";
 
 // Schema for holiday - used to validate API requests
 const baseSchema = holidaySchema.omit(timestamps);
@@ -37,5 +37,5 @@ export type HolidayId = z.infer<typeof holidayIdSchema>["id"];
 
 // this type infers the return from getHolidays() - meaning it will include any joins
 export type CompleteHoliday = Awaited<
-  ReturnType<typeof getHolidays>
+  ReturnType<typeof getHoliday>
 >["holiday"][number];

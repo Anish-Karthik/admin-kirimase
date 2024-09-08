@@ -1,17 +1,20 @@
 import { db } from "@/lib/db/index";
-import { 
-  StudentId, 
+import {
+  StudentId,
   NewStudentParams,
-  UpdateStudentParams, 
+  UpdateStudentParams,
   updateStudentSchema,
-  insertStudentSchema, 
-  studentIdSchema 
+  insertStudentSchema,
+  studentIdSchema,
 } from "@/lib/db/schema/student";
 import { getUserAuth } from "@/lib/auth/utils";
 
 export const createStudent = async (student: NewStudentParams) => {
   const { session } = await getUserAuth();
-  const newStudent = insertStudentSchema.parse({ ...student, userId: session?.user.id! });
+  const newStudent = insertStudentSchema.parse({
+    ...student,
+    userId: session?.user.id,
+  });
   try {
     const s = await db.student.create({ data: newStudent });
     return { student: s };
@@ -22,12 +25,21 @@ export const createStudent = async (student: NewStudentParams) => {
   }
 };
 
-export const updateStudent = async (id: StudentId, student: UpdateStudentParams) => {
+export const updateStudent = async (
+  id: StudentId,
+  student: UpdateStudentParams
+) => {
   const { session } = await getUserAuth();
   const { id: studentId } = studentIdSchema.parse({ id });
-  const newStudent = updateStudentSchema.parse({ ...student, userId: session?.user.id! });
+  const newStudent = updateStudentSchema.parse({
+    ...student,
+    userId: session?.user.id,
+  });
   try {
-    const s = await db.student.update({ where: { id: studentId, userId: session?.user.id! }, data: newStudent})
+    const s = await db.student.update({
+      where: { id: studentId, userId: session?.user.id },
+      data: newStudent,
+    });
     return { student: s };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -40,7 +52,9 @@ export const deleteStudent = async (id: StudentId) => {
   const { session } = await getUserAuth();
   const { id: studentId } = studentIdSchema.parse({ id });
   try {
-    const s = await db.student.delete({ where: { id: studentId, userId: session?.user.id! }})
+    const s = await db.student.delete({
+      where: { id: studentId, userId: session?.user.id },
+    });
     return { student: s };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
@@ -48,4 +62,3 @@ export const deleteStudent = async (id: StudentId) => {
     throw { error: message };
   }
 };
-

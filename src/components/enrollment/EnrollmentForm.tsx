@@ -1,6 +1,10 @@
 "use client";
 
-import { Enrollment, NewEnrollmentParams, insertEnrollmentParams } from "@/lib/db/schema/enrollment";
+import {
+  Enrollment,
+  NewEnrollmentParams,
+  insertEnrollmentParams,
+} from "@/lib/db/schema/enrollment";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,10 +20,21 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, onError } from "@/lib/utils";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -31,8 +46,9 @@ const EnrollmentForm = ({
   enrollment?: Enrollment;
   closeModal?: () => void;
 }) => {
-  const { data: courseEnrolledStudents } = trpc.courseEnrolledStudents.getCourseEnrolledStudents.useQuery();
-  const { data: sections } = trpc.sections.getSections.useQuery();
+  const { data: courseEnrolledStudents } =
+    trpc.courseEnrolledStudent.getCourseEnrolledStudent.useQuery();
+  const { data: sections } = trpc.section.getSection.useQuery();
   const editing = !!enrollment?.id;
 
   const router = useRouter();
@@ -43,44 +59,47 @@ const EnrollmentForm = ({
     // open issue: https://github.com/colinhacks/zod/issues/2663
     // errors locally but not in production
     resolver: zodResolver(insertEnrollmentParams),
-    defaultValues: enrollment ?? {
-      rollNumber: 0,
-     courseEnrolledStudentId: "",
-     sectionId: "",
-     joinedAt: new Date(),
-     leftAt: new Date()
-    },
+    defaultValues: !enrollment
+      ? {
+          rollNumber: 0,
+          courseEnrolledStudentId: "",
+          sectionId: "",
+          joinedAt: new Date(),
+          leftAt: new Date(),
+        }
+      : { ...enrollment, leftAt: new Date() },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.enrollment.getEnrollment.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Enrollment ${action}d!`);
+    toast.success(`Enrollment ${action}d!`);
   };
 
   const { mutate: createEnrollment, isLoading: isCreating } =
     trpc.enrollment.createEnrollment.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateEnrollment, isLoading: isUpdating } =
     trpc.enrollment.updateEnrollment.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteEnrollment, isLoading: isDeleting } =
     trpc.enrollment.deleteEnrollment.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -97,11 +116,12 @@ const EnrollmentForm = ({
         <FormField
           control={form.control}
           name="rollNumber"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Roll Number</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -110,9 +130,10 @@ const EnrollmentForm = ({
         <FormField
           control={form.control}
           name="courseEnrolledStudentId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Course Enrolled Student Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -121,14 +142,20 @@ const EnrollmentForm = ({
                     <SelectValue placeholder="Select a course enrolled student" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courseEnrolledStudents?.courseEnrolledStudents.map((courseEnrolledStudent) => (
-                      <SelectItem key={courseEnrolledStudent.id} value={courseEnrolledStudent.id.toString()}>
-                        {courseEnrolledStudent.id}  {/* TODO: Replace with a field from the courseEnrolledStudent model */}
-                      </SelectItem>
-                    ))}
+                    {courseEnrolledStudents?.courseEnrolledStudent.map(
+                      (courseEnrolledStudent) => (
+                        <SelectItem
+                          key={courseEnrolledStudent.id}
+                          value={courseEnrolledStudent.id.toString()}
+                        >
+                          {courseEnrolledStudent.id}{" "}
+                          {/* TODO: Replace with a field from the courseEnrolledStudent model */}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -137,9 +164,10 @@ const EnrollmentForm = ({
         <FormField
           control={form.control}
           name="sectionId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Section Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -148,14 +176,18 @@ const EnrollmentForm = ({
                     <SelectValue placeholder="Select a section" />
                   </SelectTrigger>
                   <SelectContent>
-                    {sections?.sections.map((section) => (
-                      <SelectItem key={section.id} value={section.id.toString()}>
-                        {section.id}  {/* TODO: Replace with a field from the section model */}
+                    {sections?.section.map((section) => (
+                      <SelectItem
+                        key={section.id}
+                        value={section.id.toString()}
+                      >
+                        {section.id}{" "}
+                        {/* TODO: Replace with a field from the section model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -164,9 +196,10 @@ const EnrollmentForm = ({
         <FormField
           control={form.control}
           name="joinedAt"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Joined At</FormLabel>
-                <br />
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -206,9 +239,10 @@ const EnrollmentForm = ({
         <FormField
           control={form.control}
           name="leftAt"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Left At</FormLabel>
-                <br />
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>

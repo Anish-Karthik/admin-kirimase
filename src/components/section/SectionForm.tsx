@@ -1,6 +1,10 @@
 "use client";
 
-import { Section, NewSectionParams, insertSectionParams } from "@/lib/db/schema/section";
+import {
+  Section,
+  NewSectionParams,
+  insertSectionParams,
+} from "@/lib/db/schema/section";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,9 +20,16 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const SectionForm = ({
   section,
@@ -27,7 +38,7 @@ const SectionForm = ({
   section?: Section;
   closeModal?: () => void;
 }) => {
-  const { data: courses } = trpc.courses.getCourses.useQuery();
+  const { data: courses } = trpc.course.getCourse.useQuery();
   const editing = !!section?.id;
 
   const router = useRouter();
@@ -40,41 +51,42 @@ const SectionForm = ({
     resolver: zodResolver(insertSectionParams),
     defaultValues: section ?? {
       name: "",
-     batchYear: 0,
-     semester: 0,
-     courseId: ""
+      batchYear: 0,
+      semester: 0,
+      courseId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.section.getSection.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Section ${action}d!`);
+    toast.success(`Section ${action}d!`);
   };
 
   const { mutate: createSection, isLoading: isCreating } =
     trpc.section.createSection.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateSection, isLoading: isUpdating } =
     trpc.section.updateSection.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteSection, isLoading: isDeleting } =
     trpc.section.deleteSection.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -91,11 +103,12 @@ const SectionForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -104,11 +117,12 @@ const SectionForm = ({
         <FormField
           control={form.control}
           name="batchYear"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Batch Year</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -117,11 +131,12 @@ const SectionForm = ({
         <FormField
           control={form.control}
           name="semester"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Semester</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -130,9 +145,10 @@ const SectionForm = ({
         <FormField
           control={form.control}
           name="courseId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Course Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -141,14 +157,15 @@ const SectionForm = ({
                     <SelectValue placeholder="Select a course" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courses?.courses.map((course) => (
+                    {courses?.course.map((course) => (
                       <SelectItem key={course.id} value={course.id.toString()}>
-                        {course.id}  {/* TODO: Replace with a field from the course model */}
+                        {course.id}{" "}
+                        {/* TODO: Replace with a field from the course model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>

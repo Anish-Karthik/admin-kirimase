@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const DayForm = ({
   day,
@@ -26,7 +27,6 @@ const DayForm = ({
   day?: Day;
   closeModal?: () => void;
 }) => {
-  
   const editing = !!day?.id;
 
   const router = useRouter();
@@ -38,39 +38,40 @@ const DayForm = ({
     // errors locally but not in production
     resolver: zodResolver(insertDayParams),
     defaultValues: day ?? {
-      name: ""
+      name: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.day.getDay.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Day ${action}d!`);
+    toast.success(`Day ${action}d!`);
   };
 
   const { mutate: createDay, isLoading: isCreating } =
     trpc.day.createDay.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateDay, isLoading: isUpdating } =
     trpc.day.updateDay.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteDay, isLoading: isDeleting } =
     trpc.day.deleteDay.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -87,11 +88,12 @@ const DayForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>

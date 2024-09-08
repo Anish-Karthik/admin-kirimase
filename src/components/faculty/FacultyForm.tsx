@@ -1,6 +1,10 @@
 "use client";
 
-import { Faculty, NewFacultyParams, insertFacultyParams } from "@/lib/db/schema/faculty";
+import {
+  Faculty,
+  NewFacultyParams,
+  insertFacultyParams,
+} from "@/lib/db/schema/faculty";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,9 +20,16 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { onError } from "@/lib/utils";
 
 const FacultyForm = ({
   faculty,
@@ -27,7 +38,7 @@ const FacultyForm = ({
   faculty?: Faculty;
   closeModal?: () => void;
 }) => {
-  const { data: departments } = trpc.departments.getDepartments.useQuery();
+  const { data: departments } = trpc.department.getDepartments.useQuery();
   const editing = !!faculty?.id;
 
   const router = useRouter();
@@ -40,39 +51,40 @@ const FacultyForm = ({
     resolver: zodResolver(insertFacultyParams),
     defaultValues: faculty ?? {
       name: "",
-     departmentId: ""
+      departmentId: "",
     },
   });
 
-  const onSuccess = async (action: "create" | "update" | "delete",
-    data?: { error?: string },
+  const onSuccess = async (
+    action: "create" | "update" | "delete",
+    data?: { error?: string }
   ) => {
-        if (data?.error) {
-      toast.error(data.error)
+    if (data?.error) {
+      toast.error(data.error);
       return;
     }
 
     await utils.faculty.getFaculty.invalidate();
     router.refresh();
     if (closeModal) closeModal();
-        toast.success(`Faculty ${action}d!`);
+    toast.success(`Faculty ${action}d!`);
   };
 
   const { mutate: createFaculty, isLoading: isCreating } =
     trpc.faculty.createFaculty.useMutation({
-      onSuccess: (res) => onSuccess("create"),
+      onSuccess: () => onSuccess("create"),
       onError: (err) => onError("create", { error: err.message }),
     });
 
   const { mutate: updateFaculty, isLoading: isUpdating } =
     trpc.faculty.updateFaculty.useMutation({
-      onSuccess: (res) => onSuccess("update"),
+      onSuccess: () => onSuccess("update"),
       onError: (err) => onError("update", { error: err.message }),
     });
 
   const { mutate: deleteFaculty, isLoading: isDeleting } =
     trpc.faculty.deleteFaculty.useMutation({
-      onSuccess: (res) => onSuccess("delete"),
+      onSuccess: () => onSuccess("delete"),
       onError: (err) => onError("delete", { error: err.message }),
     });
 
@@ -89,11 +101,12 @@ const FacultyForm = ({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Name</FormLabel>
-                <FormControl>
-            <Input {...field} />
-          </FormControl>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
 
               <FormMessage />
             </FormItem>
@@ -102,9 +115,10 @@ const FacultyForm = ({
         <FormField
           control={form.control}
           name="departmentId"
-          render={({ field }) => (<FormItem>
+          render={({ field }) => (
+            <FormItem>
               <FormLabel>Department Id</FormLabel>
-                <FormControl>
+              <FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
@@ -114,13 +128,17 @@ const FacultyForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {departments?.departments.map((department) => (
-                      <SelectItem key={department.id} value={department.id.toString()}>
-                        {department.id}  {/* TODO: Replace with a field from the department model */}
+                      <SelectItem
+                        key={department.id}
+                        value={department.id.toString()}
+                      >
+                        {department.id}{" "}
+                        {/* TODO: Replace with a field from the department model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-            </FormControl>
+              </FormControl>
 
               <FormMessage />
             </FormItem>
