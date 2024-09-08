@@ -92,6 +92,19 @@ model Department {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  course    Course[]
+
+  @@index([userId])
+}
+
+model Course {
+  id           String     @id @default(cuid())
+  name         String
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String
+  userId       String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@index([userId])
 }
