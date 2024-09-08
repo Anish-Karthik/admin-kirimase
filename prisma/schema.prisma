@@ -84,15 +84,16 @@ model Holiday {
 }
 
 model Department {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   code      String
-  college   College  @relation(fields: [collegeId], references: [id])
+  college   College   @relation(fields: [collegeId], references: [id])
   collegeId String
   userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   course    Course[]
+  faculty   Faculty[]
 
   @@index([userId])
 }
@@ -220,6 +221,18 @@ model Enrollment {
   userId                  String
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @updatedAt
+
+  @@index([userId])
+}
+
+model Faculty {
+  id           String     @id @default(cuid())
+  name         String
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String
+  userId       String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@index([userId])
 }
