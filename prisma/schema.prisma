@@ -98,26 +98,42 @@ model Department {
 }
 
 model Course {
-  id           String     @id @default(cuid())
-  name         String
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId String
-  userId       String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                    String                  @id @default(cuid())
+  name                  String
+  department            Department              @relation(fields: [departmentId], references: [id])
+  departmentId          String
+  userId                String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  courseEnrolledStudent CourseEnrolledStudent[]
 
   @@index([userId])
 }
 
 model Student {
+  id                    String                  @id @default(cuid())
+  name                  String
+  regNumber             String
+  email                 String
+  userId                String
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  CourseEnrolledStudent CourseEnrolledStudent[]
+
+  @@index([regNumber])
+  @@index([userId])
+}
+
+model CourseEnrolledStudent {
   id        String   @id @default(cuid())
-  name      String
-  regNumber String
-  email     String
+  batchYear Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId String
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([regNumber])
   @@index([userId])
 }

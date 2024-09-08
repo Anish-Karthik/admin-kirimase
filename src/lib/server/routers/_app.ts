@@ -6,6 +6,7 @@ import { holidayRouter } from "./holiday";
 import { departmentRouter } from "./department";
 import { courseRouter } from "./course";
 import { studentRouter } from "./student";
+import { courseEnrolledStudentRouter } from "./courseEnrolledStudent";
 
 export const appRouter = router({
   computers: computersRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   department: departmentRouter,
   course: courseRouter,
   student: studentRouter,
+  courseEnrolledStudent: courseEnrolledStudentRouter,
 });
 
 export type AppRouter = typeof appRouter;
