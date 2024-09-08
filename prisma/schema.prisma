@@ -127,15 +127,16 @@ model Student {
 }
 
 model CourseEnrolledStudent {
-  id        String   @id @default(cuid())
-  batchYear Int
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  String
-  student   Student  @relation(fields: [studentId], references: [id])
-  studentId String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String            @id @default(cuid())
+  batchYear       Int
+  course          Course            @relation(fields: [courseId], references: [id])
+  courseId        String
+  student         Student           @relation(fields: [studentId], references: [id])
+  studentId       String
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  electiveSubject ElectiveSubject[]
 
   @@index([userId])
 }
@@ -164,25 +165,43 @@ model Period {
 }
 
 model Section {
-  id        String   @id @default(cuid())
-  name      String
-  batchYear Int
-  semester  Int
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String            @id @default(cuid())
+  name            String
+  batchYear       Int
+  semester        Int
+  course          Course            @relation(fields: [courseId], references: [id])
+  courseId        String
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  ElectiveSubject ElectiveSubject[]
 
   @@index([userId])
 }
 
 model Subject {
-  id           String   @id @default(cuid())
-  name         String
-  code         String
-  electiveName String?
-  userId       String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String            @id @default(cuid())
+  name            String
+  code            String
+  electiveName    String?
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  ElectiveSubject ElectiveSubject[]
+}
+
+model ElectiveSubject {
+  id                      String                @id @default(cuid())
+  courseEnrolledStudent   CourseEnrolledStudent @relation(fields: [courseEnrolledStudentId], references: [id])
+  courseEnrolledStudentId String
+  subject                 Subject               @relation(fields: [subjectId], references: [id])
+  subjectId               String
+  section                 Section               @relation(fields: [sectionId], references: [id])
+  sectionId               String
+  userId                  String
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  @@index([courseEnrolledStudentId])
+  @@index([userId])
 }
