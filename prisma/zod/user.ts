@@ -1,4 +1,5 @@
 import * as z from "zod"
+import { UserRole } from "@prisma/client"
 import { CompleteSession, relatedSessionSchema } from "./index"
 
 export const userSchema = z.object({
@@ -7,7 +8,7 @@ export const userSchema = z.object({
   password: z.string(),
   name: z.string().nullish(),
   phone: z.string().nullish(),
-  role: z.string(),
+  role: z.nativeEnum(UserRole),
   verified: z.boolean(),
   userId: z.string(),
   createdAt: z.date(),

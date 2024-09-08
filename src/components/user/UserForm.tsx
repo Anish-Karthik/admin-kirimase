@@ -43,7 +43,7 @@ const UserForm = ({
       password: "",
       name: "",
       phone: "",
-      role: "",
+      role: "USER",
       verified: false,
     },
   });
@@ -98,7 +98,7 @@ const UserForm = ({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
 
               <FormMessage />
@@ -126,8 +126,7 @@ const UserForm = ({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                {/* @ts-expect-error: none */}
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
 
               <FormMessage />
@@ -141,8 +140,7 @@ const UserForm = ({
             <FormItem>
               <FormLabel>Phone</FormLabel>
               <FormControl>
-                {/* @ts-expect-error: none */}
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ""} />
               </FormControl>
 
               <FormMessage />

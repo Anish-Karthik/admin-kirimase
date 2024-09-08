@@ -29,7 +29,7 @@ export async function signInAction(
   if (error !== null) return { error };
 
   try {
-    const existingUser = await db.user.findUnique({
+    const existingUser = await db.user.findFirst({
       where: { email: data.email.toLowerCase() },
     });
     if (!existingUser) {

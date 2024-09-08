@@ -29,7 +29,7 @@ const User = ({ user }: { user: CompleteUser }) => {
       <div className="w-full">
         <div>{user.email}</div>
       </div>
-      <UserModal user={user} />
+      <UserModal user={{ ...user, role: "USER" }} />
     </li>
   );
 };
