@@ -53,3 +53,12 @@ model Subscription {
 
   @@id([userId, stripeCustomerId])
 }
+
+model College {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
